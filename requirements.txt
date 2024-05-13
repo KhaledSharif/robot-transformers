@@ -1,1 +1,8 @@
+torch
+torchvision
+triton
 gym-aloha
+termcolor
+einops
+av
+wandb

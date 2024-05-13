@@ -1,0 +1,42 @@
+defaults:
+  - _self_
+  - env: pusht
+  - policy: diffusion
+
+hydra:
+  run:
+    dir: outputs/train/${now:%Y-%m-%d}/${now:%H-%M-%S}_${env.name}_${policy.name}_${hydra.job.name}
+  job:
+    name: default
+
+device: cuda  # cpu
+# `seed` is used for training (eg: model initialization, dataset shuffling)
+# AND for the evaluation environments.
+seed: ???
+dataset_repo_id: lerobot/pusht
+
+training:
+  offline_steps: ???
+  online_steps: ???
+  online_steps_between_rollouts: ???
+  online_sampling_ratio: 0.5
+  # `online_env_seed` is used for environments for online training data rollouts.
+  online_env_seed: ???
+  eval_freq: ???
+  save_freq: ???
+  log_freq: 250
+  save_model: true
+
+eval:
+  n_episodes: 1
+  # `batch_size` specifies the number of environments to use in a gym.vector.VectorEnv.
+  batch_size: 1
+  # `use_async_envs` specifies whether to use asynchronous environments (multiprocessing).
+  use_async_envs: false
+
+wandb:
+  enable: true
+  # Set to true to disable saving an artifact despite save_model == True
+  disable_artifact: false
+  project: lerobot
+  notes: ""
