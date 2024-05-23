@@ -6,15 +6,20 @@ and [xArm](https://github.com/huggingface/gym-xarm)
 
 ![out.gif](aloha.gif)
 
-View my training & evaluation graphs: https://api.wandb.ai/links/kldsrforg/w9tbtb83
+In the ALOHA `TransferCubeTask`, the right arm of a robot needs to pick up a red cube
+and place it inside the gripper of the left arm.
 
-### What is an Action Chunking Transformer (ACT)
+View my training & evaluation graphs: https://api.wandb.ai/links/kldsrforg/60wui44j
+
+---
+
+### What is an Action Chunking Transformer (ACT)?
 
 An Action Chunking Transformer is a novel imitation learning algorithm designed to handle the complexities of
 fine-grained robotic manipulation tasks. It leverages the strengths of action chunking and the Transformer
 architecture to improve the learning and execution of these tasks.
 
-### Key Concepts and Components
+### ACT Key Concepts
 
 1. **Action Chunking**:
     - **Definition**: Action chunking refers to grouping a sequence of actions together and treating them as a single
@@ -44,7 +49,7 @@ architecture to improve the learning and execution of these tasks.
       predicted actions are then combined using an exponential weighting scheme, which prioritizes more recent
       predictions but still takes older ones into account.
 
-### Workflow of the Action Chunking Transformer
+### ACT Workflow
 
 1. **Data Collection**:
     - Human demonstrations are collected using a teleoperation system. The joint positions of the leader robot (operated
@@ -64,7 +69,7 @@ architecture to improve the learning and execution of these tasks.
     - Temporal ensembling is applied to combine predictions from overlapping action chunks, ensuring smooth and precise
       motion.
 
-### Advantages
+### ACT Advantages
 
 - **Reduction of Compounding Errors**: By predicting action sequences, the effective horizon is reduced, and errors do
   not compound as rapidly.
@@ -73,6 +78,3 @@ architecture to improve the learning and execution of these tasks.
 - **Smooth and Precise Actions**: Temporal ensembling helps in producing smooth and accurate actions, which are crucial
   for fine-grained manipulation tasks.
 
-In summary, the Action Chunking Transformer combines the benefits of action chunking and the advanced sequence modeling
-capabilities of Transformers to address the challenges in fine-grained robotic manipulation, making it possible to
-perform complex tasks with low-cost hardware.
