@@ -1,8 +1,12 @@
 # Hugging Face Robot Examples
 
-Examples of how to use HuggingFace for Robotic
+This repository contains quickstart example code that trains and evaluates Action Chunking Transformers (ACT) on
 tasks: [ALOHA](https://github.com/huggingface/gym-aloha), [PushT](https://github.com/huggingface/gym-pusht),
 and [xArm](https://github.com/huggingface/gym-xarm)
+
+![out.gif](aloha.gif)
+
+View my training & evaluation graphs: https://api.wandb.ai/links/kldsrforg/w9tbtb83
 
 ### What is an Action Chunking Transformer (ACT)
 
