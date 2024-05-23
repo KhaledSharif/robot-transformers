@@ -19,17 +19,16 @@ architecture to improve the learning and execution of these tasks.
       problem. Compounding errors occur when small prediction errors accumulate over time, leading the robot to states
       that are outside the training distribution and causing task failures.
     - **Implementation**: In the context of the Action Chunking Transformer, the policy models the probability
-      distribution of a sequence of actions given the current observation, denoted as \( \pi_\theta(a_{t:t+k} | s_t) \),
-      instead of a single action \( \pi_\theta(a_t | s_t) \).
+      distribution of a sequence of actions given the current observation.
 
 2. **Transformer Architecture**:
     - **Transformers**: Originally designed for natural language processing tasks, Transformers are effective at
       handling sequence data and capturing long-range dependencies.
-    - **Encoder-Decoder Structure**: In this implementation, the Transformer encoder processes the observation inputs (
-      including visual data and joint positions), and the Transformer decoder predicts the sequence of actions.
+    - **Encoder-Decoder Structure**: In this implementation, the Transformer encoder processes the observation inputs
+      (including visual data and joint positions), and the Transformer decoder predicts the sequence of actions.
     - **Conditional Variational Autoencoder (CVAE)**: The Action Chunking Transformer uses a CVAE to handle the
       variability in human demonstrations. The CVAE encoder compresses the observed actions and joint positions into a
-      latent variable \( z \), which the decoder then uses, along with the observations, to predict the sequence of
+      latent variable `z`, which the decoder then uses, along with the observations, to predict the sequence of
       actions.
 
 3. **Temporal Ensembling**:
@@ -49,15 +48,15 @@ architecture to improve the learning and execution of these tasks.
       positions of the follower robot.
 
 2. **Training**:
-    - The CVAE encoder processes the collected data to learn a latent representation \( z \).
-    - The Transformer decoder, conditioned on \( z \) and the current observations, predicts the sequence of future
+    - The CVAE encoder processes the collected data to learn a latent representation `z`.
+    - The Transformer decoder, conditioned on `z` and the current observations, predicts the sequence of future
       actions.
     - The model is trained to minimize the reconstruction loss (difference between predicted and actual actions) and the
       KL-divergence regularization loss to ensure the latent space is well-structured.
 
 3. **Inference**:
     - During execution, the policy generates action sequences based on the current observation and the mean of the prior
-      distribution of \( z \).
+      distribution of `z`.
     - Temporal ensembling is applied to combine predictions from overlapping action chunks, ensuring smooth and precise
       motion.
 
