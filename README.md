@@ -1,7 +1,8 @@
 # Action Transformers for Robots
 
 This repository contains quickstart code to train and evaluate an Action Chunking Transformer (ACT) to perform
-various robot manipulation tasks derived from [ALOHA](https://github.com/huggingface/gym-aloha), [PushT](https://github.com/huggingface/gym-pusht),
+various robot manipulation tasks derived
+from [ALOHA](https://github.com/huggingface/gym-aloha), [PushT](https://github.com/huggingface/gym-pusht),
 and [xArm](https://github.com/huggingface/gym-xarm).
 
 ![out.gif](aloha.gif)
@@ -89,44 +90,87 @@ available_tasks_per_env = {
     "pusht": ["PushT-v0"],
     "xarm": ["XarmLift-v0"],
 }
+available_datasets_per_env = {
+    "aloha": [
+        "lerobot/aloha_sim_insertion_human",
+        "lerobot/aloha_sim_insertion_scripted",
+        "lerobot/aloha_sim_transfer_cube_human",
+        "lerobot/aloha_sim_transfer_cube_scripted",
+    ],
+    "pusht": ["lerobot/pusht"],
+    "xarm": [
+        "lerobot/xarm_lift_medium",
+        "lerobot/xarm_lift_medium_replay",
+        "lerobot/xarm_push_medium",
+        "lerobot/xarm_push_medium_replay",
+    ],
+}
 ```
 
 ```bash
-python train.py
-   hydra.job.name=act_aloha_sim_transfer_cube_human
-   hydra.run.dir=outputs/train/act_aloha_sim_transfer_cube_human
-   policy=act
-   policy.use_vae=true
-   env=aloha
-   env.task=AlohaTransferCube-v0
-   dataset_repo_id=lerobot/aloha_sim_transfer_cube_human
-   training.eval_freq=10000
-   training.log_freq=250
-   training.offline_steps=100000
-   training.save_model=true
-   training.save_freq=25000
-   eval.n_episodes=50
-   eval.batch_size=50
-   wandb.enable=true
+python train.py \
+   hydra.job.name=act_aloha_sim_transfer_cube_human \
+   hydra.run.dir=outputs/train/act_aloha_sim_transfer_cube_human \
+   policy=act \
+   policy.use_vae=true \
+   env=aloha \
+   env.task=AlohaTransferCube-v0 \
+   dataset_repo_id=lerobot/aloha_sim_transfer_cube_human \
+   training.eval_freq=10000 \
+   training.log_freq=250 \
+   training.offline_steps=100000 \
+   training.save_model=true \
+   training.save_freq=25000 \
+   eval.n_episodes=50 \
+   eval.batch_size=50 \
+   wandb.enable=true \
    device=cuda
 ```
 
 ```bash
-python train.py
-   hydra.job.name=act_aloha_sim_insertion_human
-   hydra.run.dir=outputs/train/act_aloha_sim_insertion_human
-   policy=act
-   policy.use_vae=true
-   env=aloha
-   env.task=AlohaInsertion-v0
-   dataset_repo_id=lerobot/aloha_sim_insertion_human
-   training.eval_freq=10000
-   training.log_freq=250
-   training.offline_steps=100000
-   training.save_model=true
-   training.save_freq=25000
-   eval.n_episodes=50
-   eval.batch_size=50
-   wandb.enable=true
+python train.py \
+   hydra.job.name=act_aloha_sim_insertion_human \
+   hydra.run.dir=outputs/train/act_aloha_sim_insertion_human \
+   policy=act \
+   policy.use_vae=true \
+   env=aloha \
+   env.task=AlohaInsertion-v0 \
+   dataset_repo_id=lerobot/aloha_sim_insertion_human \
+   training.eval_freq=10000 \
+   training.log_freq=250 \
+   training.offline_steps=100000 \
+   training.save_model=true \
+   training.save_freq=25000 \
+   eval.n_episodes=50 \
+   eval.batch_size=50 \
+   wandb.enable=true \
    device=cuda
 ```
+
+### Evaluation
+
+Evaluate a policy on an environment by running rollouts and computing metrics.
+
+Usage examples:
+
+You want to evaluate a model from the hub (eg: https://huggingface.co/lerobot/diffusion_pusht)
+for 10 episodes.
+
+```bash
+python eval.py -p lerobot/diffusion_pusht eval.n_episodes=10
+```
+
+OR, you want to evaluate a model checkpoint from the LeRobot training script for 10 episodes.
+
+```bash
+python eval.py \
+    -p outputs/train/diffusion_pusht/checkpoints/005000 \
+    eval.n_episodes=10
+```
+
+Note that in both examples, the repo/folder should contain at least `config.json`, `config.yaml` and
+`model.safetensors`.
+
+Note the formatting for providing the number of episodes. Generally, you may provide any number of arguments
+with `qualified.parameter.name=value`. In this case, the parameter eval.n_episodes appears as `n_episodes`
+nested under `eval` in the `config.yaml` found [here](https://huggingface.co/lerobot/diffusion_pusht/tree/main).
