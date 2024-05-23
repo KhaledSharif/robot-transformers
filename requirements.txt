@@ -1,8 +1,16 @@
 torch
 torchvision
 triton
-gym-aloha
 termcolor
 einops
 av
 wandb
+datasets
+gym-pusht
+gym-aloha
+gym-xarm
+omegaconf
+safetensors
+hydra-core
+diffusers
+robomimic
