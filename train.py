@@ -1,11 +1,8 @@
 import logging
 from copy import deepcopy
 from pathlib import Path
-import datasets
 import hydra
 import torch
-from datasets import concatenate_datasets
-from datasets.utils import disable_progress_bars, enable_progress_bars
 from lerobot.common.datasets.factory import make_dataset
 from lerobot.common.datasets.utils import cycle
 from lerobot.common.envs.factory import make_env
@@ -18,101 +15,7 @@ from lerobot.common.utils.utils import (
     set_global_seed,
 )
 from lerobot.scripts.eval import eval_policy
-from utils import (make_optimizer_and_scheduler, update_policy, log_train_info,
-                   log_eval_info, calculate_online_sample_weight)
-
-
-def add_episodes_inplace(
-        online_dataset: torch.utils.data.Dataset,
-        concat_dataset: torch.utils.data.ConcatDataset,
-        sampler: torch.utils.data.WeightedRandomSampler,
-        hf_dataset: datasets.Dataset,
-        episode_data_index: dict[str, torch.Tensor],
-        pc_online_samples: float,
-):
-    """
-    Modifies the online_dataset, concat_dataset, and sampler in place by integrating
-    new episodes from hf_dataset into the online_dataset, updating the concatenated
-    dataset's structure and adjusting the sampling strategy based on the specified
-    percentage of online samples.
-
-    Parameters:
-    - online_dataset (torch.utils.data.Dataset): The existing online dataset to be updated.
-    - concat_dataset (torch.utils.data.ConcatDataset): The concatenated dataset that combines
-      offline and online datasets, used for sampling purposes.
-    - sampler (torch.utils.data.WeightedRandomSampler): A sampler that will be updated to
-      reflect changes in the dataset sizes and specified sampling weights.
-    - hf_dataset (datasets.Dataset): A Hugging Face dataset containing the new episodes to be added.
-    - episode_data_index (dict): A dictionary containing two keys ("from" and "to") associated to dataset indices.
-      They indicate the start index and end index of each episode in the dataset.
-    - pc_online_samples (float): The target percentage of samples that should come from
-      the online dataset during sampling operations.
-
-    Raises:
-    - AssertionError: If the first episode_id or index in hf_dataset is not 0
-    """
-    first_episode_idx = hf_dataset.select_columns("episode_index")[0][
-        "episode_index"
-    ].item()
-    last_episode_idx = hf_dataset.select_columns("episode_index")[-1][
-        "episode_index"
-    ].item()
-    first_index = hf_dataset.select_columns("index")[0]["index"].item()
-    last_index = hf_dataset.select_columns("index")[-1]["index"].item()
-    # sanity check
-    assert first_episode_idx == 0, f"{first_episode_idx=} is not 0"
-    assert first_index == 0, f"{first_index=} is not 0"
-    assert first_index == episode_data_index["from"][first_episode_idx].item()
-    assert last_index == episode_data_index["to"][last_episode_idx].item() - 1
-
-    if len(online_dataset) == 0:
-        # initialize online dataset
-        online_dataset.hf_dataset = hf_dataset
-        online_dataset.episode_data_index = episode_data_index
-    else:
-        # get the starting indices of the new episodes and frames to be added
-        start_episode_idx = last_episode_idx + 1
-        start_index = last_index + 1
-
-        def shift_indices(episode_index, index):
-            # note: we don't shift "frame_index" since it represents the
-            # index of the frame in the episode it belongs to
-            example = {
-                "episode_index": episode_index + start_episode_idx,
-                "index": index + start_index,
-            }
-            return example
-
-        disable_progress_bars()  # map has a tqdm progress bar
-        hf_dataset = hf_dataset.map(
-            shift_indices, input_columns=["episode_index", "index"]
-        )
-        enable_progress_bars()
-
-        episode_data_index["from"] += start_index
-        episode_data_index["to"] += start_index
-
-        # extend online dataset
-        online_dataset.hf_dataset = concatenate_datasets(
-            [online_dataset.hf_dataset, hf_dataset]
-        )
-
-    # update the concatenated dataset length used during sampling
-    concat_dataset.cumulative_sizes = concat_dataset.cumsum(concat_dataset.datasets)
-
-    # update the sampling weights for each frame so that online frames get sampled a certain percentage of times
-    len_online = len(online_dataset)
-    len_offline = len(concat_dataset) - len_online
-    weight_offline = 1.0
-    weight_online = calculate_online_sample_weight(
-        len_offline, len_online, pc_online_samples
-    )
-    sampler.weights = torch.tensor(
-        [weight_offline] * len_offline + [weight_online] * len(online_dataset)
-    )
-
-    # update the total number of samples used during sampling
-    sampler.num_samples = len(concat_dataset)
+from utils import make_optimizer_and_scheduler, update_policy, log_train_info, log_eval_info, add_episodes_inplace
 
 
 @hydra.main(version_base="1.2", config_name="default", config_path="./configs")
