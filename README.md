@@ -78,3 +78,55 @@ architecture to improve the learning and execution of these tasks.
 - **Smooth and Precise Actions**: Temporal ensembling helps in producing smooth and accurate actions, which are crucial
   for fine-grained manipulation tasks.
 
+### Training
+
+```python
+available_tasks_per_env = {
+    "aloha": [
+        "AlohaInsertion-v0",
+        "AlohaTransferCube-v0",
+    ],
+    "pusht": ["PushT-v0"],
+    "xarm": ["XarmLift-v0"],
+}
+```
+
+```bash
+python train.py
+   hydra.job.name=act_aloha_sim_transfer_cube_human
+   hydra.run.dir=outputs/train/act_aloha_sim_transfer_cube_human
+   policy=act
+   policy.use_vae=true
+   env=aloha
+   env.task=AlohaTransferCube-v0
+   dataset_repo_id=lerobot/aloha_sim_transfer_cube_human
+   training.eval_freq=10000
+   training.log_freq=250
+   training.offline_steps=100000
+   training.save_model=true
+   training.save_freq=25000
+   eval.n_episodes=50
+   eval.batch_size=50
+   wandb.enable=true
+   device=cuda
+```
+
+```bash
+python train.py
+   hydra.job.name=act_aloha_sim_insertion_human
+   hydra.run.dir=outputs/train/act_aloha_sim_insertion_human
+   policy=act
+   policy.use_vae=true
+   env=aloha
+   env.task=AlohaInsertion-v0
+   dataset_repo_id=lerobot/aloha_sim_insertion_human
+   training.eval_freq=10000
+   training.log_freq=250
+   training.offline_steps=100000
+   training.save_model=true
+   training.save_freq=25000
+   eval.n_episodes=50
+   eval.batch_size=50
+   wandb.enable=true
+   device=cuda
+```

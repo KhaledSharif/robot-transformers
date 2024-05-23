@@ -61,12 +61,12 @@ from lerobot.common.utils.utils import get_safe_torch_device, init_hydra_config,
 
 
 def rollout(
-    env: gym.vector.VectorEnv,
-    policy: Policy,
-    seeds: list[int] | None = None,
-    return_observations: bool = False,
-    render_callback: Callable[[gym.vector.VectorEnv], None] | None = None,
-    enable_progbar: bool = False,
+        env: gym.vector.VectorEnv,
+        policy: Policy,
+        seeds: list[int] | None = None,
+        return_observations: bool = False,
+        render_callback: Callable[[gym.vector.VectorEnv], None] | None = None,
+        enable_progbar: bool = False,
 ) -> dict:
     """Run a batched policy rollout once through a batch of environments.
 
@@ -189,15 +189,15 @@ def rollout(
 
 
 def eval_policy(
-    env: gym.vector.VectorEnv,
-    policy: torch.nn.Module,
-    n_episodes: int,
-    max_episodes_rendered: int = 0,
-    video_dir: Path | None = None,
-    return_episode_data: bool = False,
-    start_seed: int | None = None,
-    enable_progbar: bool = False,
-    enable_inner_progbar: bool = False,
+        env: gym.vector.VectorEnv,
+        policy: torch.nn.Module,
+        n_episodes: int,
+        max_episodes_rendered: int = 0,
+        video_dir: Path | None = None,
+        return_episode_data: bool = False,
+        start_seed: int | None = None,
+        enable_progbar: bool = False,
+        enable_inner_progbar: bool = False,
 ) -> dict:
     """
     Args:
@@ -297,11 +297,11 @@ def eval_policy(
             else:
                 # Some sanity checks to make sure we are not correctly compiling the data.
                 assert (
-                    episode_data["hf_dataset"]["episode_index"][-1] + 1
-                    == this_episode_data["hf_dataset"]["episode_index"][0]
+                        episode_data["hf_dataset"]["episode_index"][-1] + 1
+                        == this_episode_data["hf_dataset"]["episode_index"][0]
                 )
                 assert (
-                    episode_data["hf_dataset"]["index"][-1] + 1 == this_episode_data["hf_dataset"]["index"][0]
+                        episode_data["hf_dataset"]["index"][-1] + 1 == this_episode_data["hf_dataset"]["index"][0]
                 )
                 assert torch.equal(
                     episode_data["episode_data_index"]["to"][-1],
@@ -327,7 +327,7 @@ def eval_policy(
         if max_episodes_rendered > 0 and len(ep_frames) > 0:
             batch_stacked_frames = np.stack(ep_frames, axis=1)  # (b, t, *)
             for stacked_frames, done_index in zip(
-                batch_stacked_frames, done_indices.flatten().tolist(), strict=False
+                    batch_stacked_frames, done_indices.flatten().tolist(), strict=False
             ):
                 if n_episodes_rendered >= max_episodes_rendered:
                     break
@@ -393,7 +393,7 @@ def eval_policy(
 
 
 def _compile_episode_data(
-    rollout_data: dict, done_indices: Tensor, start_episode_index: int, start_data_index: int, fps: float
+        rollout_data: dict, done_indices: Tensor, start_episode_index: int, start_data_index: int, fps: float
 ) -> dict:
     """Convenience function for `eval_policy(return_episode_data=True)`
 
@@ -474,7 +474,7 @@ def _compile_episode_data(
             "timestamp": Value(dtype="float32", id=None),
             "next.reward": Value(dtype="float32", id=None),
             "next.done": Value(dtype="bool", id=None),
-            #'next.success': Value(dtype='bool', id=None),
+            # 'next.success': Value(dtype='bool', id=None),
             "index": Value(dtype="int64", id=None),
         }
     )
@@ -488,9 +488,9 @@ def _compile_episode_data(
 
 
 def eval(
-    pretrained_policy_path: str | None = None,
-    hydra_cfg_path: str | None = None,
-    config_overrides: list[str] | None = None,
+        pretrained_policy_path: str | None = None,
+        hydra_cfg_path: str | None = None,
+        config_overrides: list[str] | None = None,
 ):
     assert (pretrained_policy_path is None) ^ (hydra_cfg_path is None)
     if hydra_cfg_path is None:

@@ -58,7 +58,7 @@ def make_optimizer_and_scheduler(cfg, policy):
             cfg.training.adam_weight_decay,
         )
         assert (
-            cfg.training.online_steps == 0
+                cfg.training.online_steps == 0
         ), "Diffusion Policy does not handle online training."
         from diffusers.optimization import get_scheduler
 
@@ -204,12 +204,12 @@ def calculate_online_sample_weight(n_off: int, n_on: int, pc_on: float):
 
 
 def add_episodes_inplace(
-    online_dataset: torch.utils.data.Dataset,
-    concat_dataset: torch.utils.data.ConcatDataset,
-    sampler: torch.utils.data.WeightedRandomSampler,
-    hf_dataset: datasets.Dataset,
-    episode_data_index: dict[str, torch.Tensor],
-    pc_online_samples: float,
+        online_dataset: torch.utils.data.Dataset,
+        concat_dataset: torch.utils.data.ConcatDataset,
+        sampler: torch.utils.data.WeightedRandomSampler,
+        hf_dataset: datasets.Dataset,
+        episode_data_index: dict[str, torch.Tensor],
+        pc_online_samples: float,
 ):
     """
     Modifies the online_dataset, concat_dataset, and sampler in place by integrating
