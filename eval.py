@@ -15,7 +15,66 @@ from lerobot.common.utils.utils import get_safe_torch_device, init_hydra_config,
 from utils import eval_policy
 
 
-def eval(
+def eval_cli():
+    init_logging()
+
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "-p",
+        "--pretrained-policy-name-or-path",
+        help=(
+            "Either the repo ID of a model hosted on the Hub or a path to a directory containing weights "
+            "saved using `Policy.save_pretrained`. If not provided, the policy is initialized from scratch "
+            "(useful for debugging). This argument is mutually exclusive with `--config`."
+        ),
+    )
+    group.add_argument(
+        "--config",
+        help=(
+            "Path to a yaml config you want to use for initializing a policy from scratch (useful for "
+            "debugging). This argument is mutually exclusive with `--pretrained-policy-name-or-path` (`-p`)."
+        ),
+    )
+    parser.add_argument("--revision", help="Optionally provide the Hugging Face Hub revision ID.")
+    parser.add_argument(
+        "overrides",
+        nargs="*",
+        help="Any key=value arguments to override config values (use dots for.nested=overrides)",
+    )
+    args = parser.parse_args()
+
+    if args.pretrained_policy_name_or_path is None:
+        eval(hydra_cfg_path=args.config, config_overrides=args.overrides)
+    else:
+        try:
+            pretrained_policy_path = Path(
+                snapshot_download(args.pretrained_policy_name_or_path, revision=args.revision)
+            )
+        except (HFValidationError, RepositoryNotFoundError) as e:
+            if isinstance(e, HFValidationError):
+                error_message = (
+                    "The provided pretrained_policy_name_or_path is not a valid Hugging Face Hub repo ID."
+                )
+            else:
+                error_message = (
+                    "The provided pretrained_policy_name_or_path was not found on the Hugging Face Hub."
+                )
+
+            logging.warning(f"{error_message} Treating it as a local directory.")
+            pretrained_policy_path = Path(args.pretrained_policy_name_or_path)
+        if not pretrained_policy_path.is_dir() or not pretrained_policy_path.exists():
+            raise ValueError(
+                "The provided pretrained_policy_name_or_path is not a valid/existing Hugging Face Hub "
+                "repo ID, nor is it an existing local directory."
+            )
+
+        evaluate(pretrained_policy_path=pretrained_policy_path, config_overrides=args.overrides)
+
+
+def evaluate(
         pretrained_policy_path: str | None = None,
         hydra_cfg_path: str | None = None,
         config_overrides: list[str] | None = None,
@@ -74,59 +133,4 @@ def eval(
 
 
 if __name__ == "__main__":
-    init_logging()
-
-    parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
-    )
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument(
-        "-p",
-        "--pretrained-policy-name-or-path",
-        help=(
-            "Either the repo ID of a model hosted on the Hub or a path to a directory containing weights "
-            "saved using `Policy.save_pretrained`. If not provided, the policy is initialized from scratch "
-            "(useful for debugging). This argument is mutually exclusive with `--config`."
-        ),
-    )
-    group.add_argument(
-        "--config",
-        help=(
-            "Path to a yaml config you want to use for initializing a policy from scratch (useful for "
-            "debugging). This argument is mutually exclusive with `--pretrained-policy-name-or-path` (`-p`)."
-        ),
-    )
-    parser.add_argument("--revision", help="Optionally provide the Hugging Face Hub revision ID.")
-    parser.add_argument(
-        "overrides",
-        nargs="*",
-        help="Any key=value arguments to override config values (use dots for.nested=overrides)",
-    )
-    args = parser.parse_args()
-
-    if args.pretrained_policy_name_or_path is None:
-        eval(hydra_cfg_path=args.config, config_overrides=args.overrides)
-    else:
-        try:
-            pretrained_policy_path = Path(
-                snapshot_download(args.pretrained_policy_name_or_path, revision=args.revision)
-            )
-        except (HFValidationError, RepositoryNotFoundError) as e:
-            if isinstance(e, HFValidationError):
-                error_message = (
-                    "The provided pretrained_policy_name_or_path is not a valid Hugging Face Hub repo ID."
-                )
-            else:
-                error_message = (
-                    "The provided pretrained_policy_name_or_path was not found on the Hugging Face Hub."
-                )
-
-            logging.warning(f"{error_message} Treating it as a local directory.")
-            pretrained_policy_path = Path(args.pretrained_policy_name_or_path)
-        if not pretrained_policy_path.is_dir() or not pretrained_policy_path.exists():
-            raise ValueError(
-                "The provided pretrained_policy_name_or_path is not a valid/existing Hugging Face Hub "
-                "repo ID, nor is it an existing local directory."
-            )
-
-        eval(pretrained_policy_path=pretrained_policy_path, config_overrides=args.overrides)
+    eval_cli()
