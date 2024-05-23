@@ -256,7 +256,8 @@ def add_episodes_inplace(
         start_index = last_index + 1
 
         def shift_indices(episode_index, index):
-            # note: we dont shift "frame_index" since it represents the index of the frame in the episode it belongs to
+            # note: we don't shift "frame_index" since it represents the
+            # index of the frame in the episode it belongs to
             example = {
                 "episode_index": episode_index + start_episode_idx,
                 "index": index + start_index,
@@ -318,8 +319,12 @@ def train(cfg: dict, out_dir=None, job_name=None):
     # Check device is available
     get_safe_torch_device(cfg.device, log=True)
 
+    # Enables cuDNN benchmark mode for better performance on certain input shapes
     torch.backends.cudnn.benchmark = True
+
+    # Allows TensorFloat32 (TF32) on Tensor Core for better performance on certain operations
     torch.backends.cuda.matmul.allow_tf32 = True
+
     set_global_seed(cfg.seed)
 
     logging.info("make_dataset")
@@ -332,7 +337,6 @@ def train(cfg: dict, out_dir=None, job_name=None):
     policy = make_policy(hydra_cfg=cfg, dataset_stats=offline_dataset.stats)
 
     # Create optimizer and scheduler
-    # Temporary hack to move optimizer out of policy
     optimizer, lr_scheduler = make_optimizer_and_scheduler(cfg, policy)
 
     num_learnable_params = sum(
@@ -356,7 +360,10 @@ def train(cfg: dict, out_dir=None, job_name=None):
     logging.info(f"{num_learnable_params=} ({format_big_number(num_learnable_params)})")
     logging.info(f"{num_total_params=} ({format_big_number(num_total_params)})")
 
-    # Note: this helper will be used in offline and online training loops.
+    # Note: this helper will be used in offline and online training loops
+    # It evaluates the policy on the evaluation environment, logs the evaluation results,
+    # and saves a model checkpoint at specified intervals (cfg.training.eval_freq and
+    # cfg.training.save_freq, respectively)
     def evaluate_and_checkpoint_if_needed(step):
         if step % cfg.training.eval_freq == 0:
             logging.info(f"Eval policy at step {step}")
@@ -401,24 +408,33 @@ def train(cfg: dict, out_dir=None, job_name=None):
         pin_memory=cfg.device != "cpu",
         drop_last=False,
     )
+
+    # Create an iterator dl_iter by applying cycle to the dataloader,
+    # which allows iterating over the dataset indefinitely
     dl_iter = cycle(dataloader)
 
+    # Set policy to training mode
     policy.train()
-    step = 0  # number of policy update (forward + backward + optim)
+
+    # number of policy update (forward + backward + optim)
+    step = 0
+
     is_offline = True
     for offline_step in range(cfg.training.offline_steps):
         if offline_step == 0:
             logging.info("Start offline training on a fixed dataset")
         batch = next(dl_iter)
 
+        # moves each tensor in the batch dictionary to the specified device
         for key in batch:
             batch[key] = batch[key].to(cfg.device, non_blocking=True)
 
+        # performs a single policy update step by calling the update_policy function,
+        # which computes the loss, performs backpropagation, & updates policy params
         train_info = update_policy(
             policy, batch, optimizer, cfg.training.grad_clip_norm, lr_scheduler
         )
 
-        # TODO(rcadene): is it ok if step_t=0 = 0 and not 1 as previously done?
         if step % cfg.training.log_freq == 0:
             log_train_info(logger, train_info, step, cfg, offline_dataset, is_offline)
 
