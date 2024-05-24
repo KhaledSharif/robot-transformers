@@ -10,7 +10,7 @@ and [xArm](https://github.com/huggingface/gym-xarm).
 In the ALOHA `TransferCubeTask`, the right arm of a robot needs to pick up a red cube
 and place it inside the gripper of the left arm.
 
-View my training & evaluation graphs: 
+View my training & evaluation graphs:
 
 - For the [Transfer Cube](https://api.wandb.ai/links/kldsrforg/wct96xoe) task (single object)
 
@@ -155,16 +155,14 @@ python train.py \
 
 Evaluate a policy on an environment by running rollouts and computing metrics.
 
-Usage examples:
-
-You want to evaluate a model from the hub (eg: https://huggingface.co/lerobot/diffusion_pusht)
+For example, to evaluate a model from the HF model hub ([diffusion_pusht](https://huggingface.co/lerobot/diffusion_pusht))
 for 10 episodes.
 
 ```bash
 python eval.py -p lerobot/diffusion_pusht eval.n_episodes=10
 ```
 
-OR, you want to evaluate a model checkpoint from the LeRobot training script for 10 episodes.
+To evaluate a model checkpoint from this repo's training script for 10 episodes.
 
 ```bash
 python eval.py \
