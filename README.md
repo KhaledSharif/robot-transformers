@@ -10,7 +10,11 @@ and [xArm](https://github.com/huggingface/gym-xarm).
 In the ALOHA `TransferCubeTask`, the right arm of a robot needs to pick up a red cube
 and place it inside the gripper of the left arm.
 
-View my training & evaluation graphs: https://api.wandb.ai/links/kldsrforg/fzmcvzc7
+View my training & evaluation graphs: 
+
+- For the [Transfer Cube](https://api.wandb.ai/links/kldsrforg/wct96xoe) task (single object)
+
+- For the [Insertion](https://api.wandb.ai/links/kldsrforg/f8ldnf3z) task (two objects)
 
 ---
 
