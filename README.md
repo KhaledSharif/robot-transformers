@@ -1,9 +1,7 @@
 # Action Transformers for Robots
 
 This repository contains quickstart code to train and evaluate an Action Chunking Transformer (ACT) to perform
-various robot manipulation tasks derived
-from [ALOHA](https://github.com/huggingface/gym-aloha), [PushT](https://github.com/huggingface/gym-pusht),
-and [xArm](https://github.com/huggingface/gym-xarm).
+various robot manipulation tasks using the [ALOHA](https://github.com/huggingface/gym-aloha) gym environment.
 
 ![out.gif](aloha.gif)
 
